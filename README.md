@@ -1,68 +1,62 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/lqRvusMP)
-[![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=19696072)
-# Final Project
+# Neuron Cytoplasm Segmentation Using Stardist and Cellpose for TDP-43 Analysis in FTD
 
-The final assignment for this class is a multi-week project. The project is self-driven but the expectation is that you will work in groups to demonstrate your ability to do something original with your newfound pythonic abilities.
+## Team Members
 
-It’s up to you, but some suggestions include:
+- **David Day**
 
-- Testing ideas for your Capstone project
-- Replicating/extending analysis done in a published paper
-- Working with an existing codebase/model to apply an interesting ML method
-- Performing a novel analysis on a dataset
+## Project Overview
 
-## Expectations
+This project focuses on segmenting neuron cytoplasm in 3D fluorescence microscopy images to support analysis of the TDP-43 protein implicated in Frontotemporal Dementia (FTD). The goal was to train and adapt two segmentation models—**Stardist** and **Cellpose**—to accurately detect and delineate neuron boundaries, which are critical for downstream morphological and protein distribution analyses.
 
-- This should involve original work from your team (size of group: anywhere between 1-38)
-- Level of effort take 2-3 weeks of your work
-- Submission will be a repository including:
-    - Code: your own and perhaps from an existing project
-    - Documentation (any format: markdown, pdf, word, video, presentation)
-        - Who worked on the project, if not just yourself
-        - Overview of the problem
-        - Description of the dataset you used (input features, outcome,dimensions, etc)
-        - Tools/methods used
-        - Decisions made along the way, including trade-offs e.g., cut X for time so our solution may lack Y)
-        - Issues overcome along the way
-        - How to run the code (dependencies, etc.)
-        - Example output (what does it do?)
-        - Citations (data, code, papers)
+## Problem Statement
 
-## Inspiration
+Neuron cytoplasm segmentation is challenging due to:
 
-### Data & code
+- Irregular, non-spherical shapes of neurons.
+- A small annotated dataset (only 30 3D-labeled images).
+- Limitations of pretrained models, which are generally tuned for rounder objects like nuclei.
 
-- [The Incredible PyTorch](https://github.com/ritchieng/the-incredible-pytorch)
+## Dataset Description
 
-    > List of papers, code, examples using PyTorch
+- **Source**: In-house lab-generated 3D fluorescence microscopy data.
+- **Annotations**: Manual 3D segmentations of neuron cytoplasm (30 volumes).
+- **Input Dimensions**: Each image is a 3D volume with shape `(Z, Y, X)` (e.g., 32×512×512 voxels).
+- **Features**: NEUN stained fluorescence intensity.
+- **Output**: Binary or labeled mask indicating segmented cytoplasmic regions.
 
-- [PhysioNet @ MIT](https://physionet.org)
+## Tools and Methods
 
-    > Research Resource for Complex Physiologic Signals
+### Segmentation Models
 
-- [Kaggle](https://www.kaggle.com)
+  - [Stardist (3D)](https://github.com/stardist/stardist)
+  - [Cellpose (3D)](https://github.com/MouseLand/cellpose)
 
-    > ML competition/collaboration site
+### Training Strategy
 
-- [Keras code examples](https://keras.io/examples/)
+  - Fine-tuned both models on custom neuron data.
+  - To combat overfitting on small data, selectively froze backbone layers in the models.
 
-    > Official examples of implementation using Google’s TensorFlow Keras
+### Frameworks Used
 
-- [PLOS papers with available data](https://journals.plos.org/plosone/search?q=data_availability%3A(osf.io%20OR%20github%20OR%20dryad%20OR%20figshare)&page=1)
+  - Python (3.9)
+  - TensorFlow/Keras (for Stardist)
+  - PyTorch (for Cellpose)
+  - NumPy, SciPy, Scikit-image for preprocessing
 
-    > Searching PLOS for keywords likely to have available data, refine further to get topics interesting to you
+## Key Decisions and Trade-offs
 
-- [PLOS recommended repositories](https://journals.plos.org/plosone/s/recommended-repositories) (data, code, and sometimes both)
+- **Freezing Layers**: Due to the limited dataset size, we froze early convolutional layers to retain general feature representations from pretrained weights while fine-tuning higher layers for neuron-specific features.
+- **Model Choice**: Tried both Stardist and Cellpose to compare Stardist struggled with non-round geometries, while Cellpose better captured cell boundaries with shape priors but will lost cells.
+- **Cut for Time**: Did not implement test-time augmentation or full 3D post-processing due to project time constraints, which may limit segmentation accuracy near borders.
 
-    > Lots here, mostly data repositories
+## Issues Overcome
 
-- [The Pudding](https://www.pudding.cool)
+- **Overfitting**: Addressed by freezing layers, aggressive dropout, and using early stopping during training.
+- **Memory Constraints**: 3D volumes are large; cropped input to sub-volumes and used data generators.
+- **Label Scarcity**: Explored elastic deformations and intensity augmentations to synthetically expand dataset.
 
-    > Visual essays with data
+## Citations
 
-### Fun Examples
-
-- [SF Budget Visualization](https://missionlocal.org/2025/05/explore-san-francisco-2024-2025-budget/)
-- [Tuesday Night Movie Night (movie recommendations)](https://www.tuesdaynightmovienight.com/quiza)
-- [This course!](https://github.com/christopherseaman/datasci_223)
-    > Assignment you didn't like? Make a better version of it! Include an example solution and, as a stretch goal, automated grading.
+* **Data**: Private lab dataset
+* **Stardist**: Schmidt, U., Weigert, M., Broaddus, C., & Myers, G. (2018). Cell Detection with Star-convex Polygons. *MICCAI*.
+* **Cellpose**: Stringer, C., Wang, T., Michaelos, M., & Pachitariu, M. (2021). Cellpose: a generalist algorithm for cellular segmentation. *Nature Methods*.
